@@ -1,0 +1,38 @@
+/* styles.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: black;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.matrix-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+#matrix-canvas {
+    display: block;
+    width: 100%;
+    height: 100vh;
+}
+
+.matrix-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: lime;
+    font-size: 3em;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 5s forwards 8s;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
