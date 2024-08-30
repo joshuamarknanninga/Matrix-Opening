@@ -14,10 +14,25 @@ html {
     height: 100vh;
 }
 
+.matrix-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+    pointer-events: none;
+    z-index: 1; /* Ensure it sits above the canvas */
+}
+
+
 #matrix-canvas {
     display: block;
     width: 100%;
     height: 100vh;
+    border: 2px solid #0F0; /* Add a glowing border to emphasize the canvas */
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); /* Optional glow effect around the canvas */
 }
 
 .matrix-title {
@@ -43,6 +58,15 @@ html {
 input[type="text"], input[type="color"] {
     font-size: 1.2em;
     margin: 0 10px;
+    padding: 5px;
+    background: #333;
+    color: #0F0; /* Match the Matrix theme */
+    border: 1px solid #0F0;
+    border-radius: 5px;
+}
+
+input[type="text"]::placeholder {
+    color: #666;
 }
 
 @keyframes fadeIn {
@@ -55,3 +79,4 @@ input[type="text"], input[type="color"] {
 .glow {
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.7), 0 0 10px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.7);
 }
+
