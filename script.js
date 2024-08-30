@@ -5,7 +5,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const matrix = "Dude this is the phrase I want to use.";
+const matrix = "I better get a good grade for this one.";
 const font_size = 16;
 const columns = canvas.width / font_size; // number of columns for the rain
 const drops = [];

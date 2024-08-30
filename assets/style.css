@@ -1,10 +1,11 @@
 /* styles.css */
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: black;
-    font-family: 'Courier New', Courier, monospace;
+    background: rgb(155, 44, 44);
+    font-family: 'Press Start 2P', Courier, monospace;
 }
 
 .matrix-container {
