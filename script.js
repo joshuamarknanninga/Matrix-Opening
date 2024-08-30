@@ -1,81 +1,169 @@
 // script.js
 const canvas = document.getElementById('matrix-canvas');
-const ctx = canvas.getContext('2d');
+const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+if (!gl) {
+    alert("WebGL isn't supported in your browser.");
+}
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Set the viewport
+gl.viewport(0, 0, canvas.width, canvas.height);
+
+// Clear the canvas with a black color
+gl.clearColor(0.0, 0.0, 0.0, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let matrix = document.getElementById('matrixText').value;
-const font_size = 16;
-const columns = canvas.width / font_size; // number of columns for the rain
-const drops = [];
+// Set the viewport
+gl.viewport(0, 0, canvas.width, canvas.height);
 
-// Initialize the drops array with varying speeds
-for (let x = 0; x < columns; x++) {
-    drops[x] = {
-        y: 1,
-        speed: Math.random() * 3 + 1, // Random speed for each column
-        alpha: 1, // Alpha for fading effect
-    };
-}
+// Clear the canvas with a black color
+gl.clearColor(0.0, 0.0, 0.0, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
 
-// Generate a random color with a slight variation
-function getRandomColor() {
-    return document.getElementById('colorPicker').value;
-}
-
-//     const letters = '0123456789ABCDEF';
-//     let color = '#';
-//     for (let i = 0; i < 6; i++) {
-//         color += letters[Math.floor(Math.random() * 16)];
-//     }
-//     return color;
-// }
-
-// Drawing the characters
-function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // ctx.fillStyle = '#0F0'; // Green text
-    ctx.font = font_size + 'px arial';
-
-    for (let i = 0; i < drops.length; i++) {
-        ctx.fillStyle = getRandomColor(); // Apply random color for each drop
-        ctx.globalAlpha = drops[i].alpha; // Apply alpha for fading effect
-
-        const text = matrix[Math.floor(Math.random() * matrix.length)];
-        if (Math.random() > 0.95) {
-            ctx.font = `bold ${font_size}px arial`; // Apply glow to some characters
-            ctx.shadowColor = getRandomColor();
-            ctx.shadowBlur = 10;
-        } else {
-            ctx.font = `${font_size}px arial`;
-            ctx.shadowBlur = 0;
-        }
-
-        ctx.fillText(text, i * font_size, drops[i].y * font_size);
-// Reset drop position to the top once it reaches the bottom
-if (drops[i].y * font_size > canvas.height && Math.random() > 0.975) {
-    drops[i].y = 0;
-    drops[i].speed = Math.random() * 3 + 1; // Reset speed when dropping from the top
-    drops[i].alpha = 1; // Reset alpha
-}
-
-// Apply speed to the drop
-drops[i].y += drops[i].speed;
-// Apply fading effect
-if (drops[i].y * font_size > canvas.height * 0.5) {
-    drops[i].alpha -= 0.01;
-}
-}
-
-ctx.globalAlpha = 1; // Reset alpha for next frame
-}
+// Vertex Shader
+const vertexShaderSource = `
+    attribute vec2 a_position;
+    varying vec2 v_texCoord;
     
+    void main(void) {
+        gl_Position = vec4(a_position, 0.0, 1.0);
+        v_texCoord = a_position * 0.5 + 0.5;
+    }
+`;
 
-setInterval(draw, 33);
+// Fragment Shader
+const fragmentShaderSource = `
+    precision mediump float;
+    varying vec2 v_texCoord;
+    
+    uniform sampler2D u_image;
+    uniform vec4 u_color;
+    uniform float u_time;
 
-document.getElementById('matrixText').addEventListener('input', function() {
-    matrix = this.value;
+    void main(void) {
+        vec2 uv = v_texCoord;
+        vec4 color = texture2D(u_image, uv) * u_color;
+        gl_FragColor = vec4(color.rgb, color.a);
+    }
+`;
+
+// Compile shader
+function compileShader(gl, shaderSource, shaderType) {
+    const shader = gl.createShader(shaderType);
+    gl.shaderSource(shader, shaderSource);
+    gl.compileShader(shader);
+    
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error('Shader compilation failed: ', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+    return shader;
+}
+
+const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+// Link the program
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program linking failed: ', gl.getProgramInfoLog(program));
+}
+
+gl.useProgram(program);
+
+// Define the vertices for a full-screen quad
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+const positions = [
+    -1.0, -1.0,
+    1.0, -1.0,
+    -1.0,  1.0,
+    1.0,  1.0,
+];
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+const positionLocation = gl.getAttribLocation(program, 'a_position');
+gl.enableVertexAttribArray(positionLocation);
+gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+// Load text texture (using canvas 2D to render text onto a texture)
+const textCanvas = document.createElement('canvas');
+textCanvas.width = canvas.width;
+textCanvas.height = canvas.height;
+const textCtx = textCanvas.getContext('2d');
+
+function updateTextTexture(text, color) {
+    textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+    textCtx.fillStyle = color;
+    textCtx.font = `${font_size}px 'Press Start 2P', monospace`;
+    textCtx.textAlign = 'center';
+    textCtx.textBaseline = 'middle';
+
+    // Create a matrix effect by drawing the text multiple times
+    for (let y = 0; y < textCanvas.height; y += font_size) {
+        for (let x = 0; x < textCanvas.width; x += font_size) {
+            const char = text[Math.floor(Math.random() * text.length)];
+            textCtx.fillText(char, x, y);
+        }
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
+    gl.generateMipmap(gl.TEXTURE_2D);
+}
+
+const texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+// Get uniform locations
+const colorLocation = gl.getUniformLocation(program, 'u_color');
+const timeLocation = gl.getUniformLocation(program, 'u_time');
+
+// Animation loop
+function render(time) {
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Update time uniform
+    gl.uniform1f(timeLocation, time * 0.001);
+
+    // Set text color (white as an example, can be changed)
+    const color = document.getElementById('colorPicker').value;
+    const [r, g, b] = hexToRgb(color);
+    gl.uniform4f(colorLocation, r / 255, g / 255, b / 255, 1.0);
+
+    // Draw the quad
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+}
+
+function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return [r, g, b];
+}
+
+const matrixTextInput = document.getElementById('matrixText');
+matrixTextInput.addEventListener('input', function() {
+    updateTextTexture(this.value, document.getElementById('colorPicker').value);
 });
+
+// Initial render
+updateTextTexture(matrixTextInput.value, document.getElementById('colorPicker').value);
+requestAnimationFrame(render);
