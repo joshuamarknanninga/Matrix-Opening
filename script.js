@@ -5,7 +5,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const matrix = "I better get a good grade for this one.";
+let matrix = document.getElementById('matrixText').value;
 const font_size = 16;
 const columns = canvas.width / font_size; // number of columns for the rain
 const drops = [];
@@ -14,19 +14,23 @@ const drops = [];
 for (let x = 0; x < columns; x++) {
     drops[x] = {
         y: 1,
-        speed: Math.random() * 3 + 1 // Random speed for each column
+        speed: Math.random() * 3 + 1, // Random speed for each column
+        alpha: 1, // Alpha for fading effect
     };
 }
 
 // Generate a random color with a slight variation
 function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    return document.getElementById('colorPicker').value;
 }
+
+//     const letters = '0123456789ABCDEF';
+//     let color = '#';
+//     for (let i = 0; i < 6; i++) {
+//         color += letters[Math.floor(Math.random() * 16)];
+//     }
+//     return color;
+// }
 
 // Drawing the characters
 function draw() {
@@ -38,17 +42,40 @@ function draw() {
 
     for (let i = 0; i < drops.length; i++) {
         ctx.fillStyle = getRandomColor(); // Apply random color for each drop
+        ctx.globalAlpha = drops[i].alpha; // Apply alpha for fading effect
+
         const text = matrix[Math.floor(Math.random() * matrix.length)];
+        if (Math.random() > 0.95) {
+            ctx.font = `bold ${font_size}px arial`; // Apply glow to some characters
+            ctx.shadowColor = getRandomColor();
+            ctx.shadowBlur = 10;
+        } else {
+            ctx.font = `${font_size}px arial`;
+            ctx.shadowBlur = 0;
+        }
+
         ctx.fillText(text, i * font_size, drops[i].y * font_size);
 // Reset drop position to the top once it reaches the bottom
 if (drops[i].y * font_size > canvas.height && Math.random() > 0.975) {
     drops[i].y = 0;
     drops[i].speed = Math.random() * 3 + 1; // Reset speed when dropping from the top
+    drops[i].alpha = 1; // Reset alpha
 }
 
 // Apply speed to the drop
 drops[i].y += drops[i].speed;
-    }
+// Apply fading effect
+if (drops[i].y * font_size > canvas.height * 0.5) {
+    drops[i].alpha -= 0.01;
+}
 }
 
+ctx.globalAlpha = 1; // Reset alpha for next frame
+}
+    
+
 setInterval(draw, 33);
+
+document.getElementById('matrixText').addEventListener('input', function() {
+    matrix = this.value;
+});
