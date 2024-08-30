@@ -37,7 +37,7 @@ const fragmentShaderSource = `
     uniform float u_time;
 
     void main(void) {
-        vec2 uv = v_texCoord;
+        vec2 uv = vec2(v_texCoord.x, mod(v_texCoord.y + u_time * 0.05, 1.0));
         vec4 color = texture2D(u_image, uv) * u_color;
         gl_FragColor = vec4(color.rgb, color.a);
     }
@@ -138,6 +138,9 @@ function render(time) {
     const color = document.getElementById('colorPicker').value;
     const [r, g, b] = hexToRgb(color);
     gl.uniform4f(colorLocation, r / 255, g / 255, b / 255, 1.0);
+
+    // Update the texture on each frame to simulate movement
+    updateTextTexture(matrixTextInput.value, color);
 
     // Draw the quad
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
