@@ -5,15 +5,6 @@ const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
 if (!gl) {
     alert("WebGL isn't supported in your browser.");
 }
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Set the viewport
-gl.viewport(0, 0, canvas.width, canvas.height);
-
-// Clear the canvas with a black color
-gl.clearColor(0.0, 0.0, 0.0, 1.0);
-gl.clear(gl.COLOR_BUFFER_BIT);
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -103,6 +94,8 @@ textCanvas.width = canvas.width;
 textCanvas.height = canvas.height;
 const textCtx = textCanvas.getContext('2d');
 
+const font_size = 16; // Define font size
+
 function updateTextTexture(text, color) {
     textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
     textCtx.fillStyle = color;
@@ -141,7 +134,7 @@ function render(time) {
     // Update time uniform
     gl.uniform1f(timeLocation, time * 0.001);
 
-    // Set text color (white as an example, can be changed)
+    // Set text color
     const color = document.getElementById('colorPicker').value;
     const [r, g, b] = hexToRgb(color);
     gl.uniform4f(colorLocation, r / 255, g / 255, b / 255, 1.0);
