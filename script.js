@@ -43,22 +43,6 @@ const fragmentShaderSource = `
     }
 `;
 
-// Fragment Shader
-const fragmentShaderSource = `
-    precision mediump float;
-    varying vec2 v_texCoord;
-    
-    uniform sampler2D u_image;
-    uniform vec4 u_color;
-    uniform float u_time;
-
-    void main(void) {
-        vec2 uv = vec2(v_texCoord.x, mod(v_texCoord.y + u_time * ` + rainSpeed + `, 1.0));
-        vec4 color = texture2D(u_image, uv) * u_color;
-        gl_FragColor = vec4(color.rgb, color.a);
-    }
-`;
-
 // Compile shader
 function compileShader(gl, shaderSource, shaderType) {
     const shader = gl.createShader(shaderType);
