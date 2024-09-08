@@ -10,13 +10,27 @@
 <body>
     <div class="matrix-container">
         <canvas id="matrix-canvas"></canvas>
-        <div class="matrix-title">Welcome to my adhd brain</div>
+        <div class="matrix-title">Welcome to my brain</div>
     </div>
     <div class="controls">
         <label for="matrixText">Matrix Text:</label>
         <input type="text" id="matrixText" value="I better get a good grade for this one.">
         <label for="colorPicker">Text Color:</label>
         <input type="color" id="colorPicker" value="#0F0">
+
+        <!-- Added controls for Font and Rain Speed -->
+        
+        <label for="fontSelector">Font:</label>
+        <select id="fontSelector">
+            <option value="monospace">Monospace</option>
+            <option value="serif">Serif</option>
+            <option value="sans-serif">Sans-serif</option>
+            <option value="cursive">Cursive</option>
+        </select>
+
+        <label for="rainSpeedSlider">Rain Speed:</label>
+        <input type="range" id="rainSpeedSlider" min="0.01" max="0.2" step="0.01" value="0.05">
+    </div>
     </div>
     <script src="script.js"></script>
 </body>
