@@ -95,11 +95,12 @@ textCanvas.height = canvas.height;
 const textCtx = textCanvas.getContext('2d');
 
 const font_size = 16; // Define font size
+let selectedFont = 'monospace';  // Default font type
 
 function updateTextTexture(text, color) {
     textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
     textCtx.fillStyle = color;
-    textCtx.font = `${font_size}px 'Press Start 2P', monospace`;
+    textCtx.font = `${font_size}px '${selectedFont}'`;  // Apply selected font dynamically
     textCtx.textAlign = 'center';
     textCtx.textBaseline = 'middle';
 
@@ -126,6 +127,8 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 // Get uniform locations
 const colorLocation = gl.getUniformLocation(program, 'u_color');
 const timeLocation = gl.getUniformLocation(program, 'u_time');
+const rainSpeedLocation = gl.getUniformLocation(program, 'rainSpeed');  // New rainSpeed uniform location
+
 
 // Animation loop
 function render(time) {
@@ -133,6 +136,10 @@ function render(time) {
 
     // Update time uniform
     gl.uniform1f(timeLocation, time * 0.001);
+
+    // Set rainSpeed uniform based on the slider value
+    const rainSpeedValue = parseFloat(document.getElementById('rainSpeedSlider').value);
+    gl.uniform1f(rainSpeedLocation, rainSpeedValue);
 
     // Set text color
     const color = document.getElementById('colorPicker').value;
@@ -154,6 +161,11 @@ function hexToRgb(hex) {
     const b = bigint & 255;
     return [r, g, b];
 }
+
+const fontSelector = document.getElementById('fontSelector');
+fontSelector.addEventListener('change', function() {
+    selectedFont = this.value;  // Update the selectedFont variable
+});
 
 const matrixTextInput = document.getElementById('matrixText');
 matrixTextInput.addEventListener('input', function() {
