@@ -35,6 +35,7 @@ const fragmentShaderSource = `
     uniform sampler2D u_image;
     uniform vec4 u_color;
     uniform float u_time;
+    uniform float rainSpeed;  // Rain speed uniform
 
     void main(void) {
         vec2 uv = vec2(v_texCoord.x, mod(v_texCoord.y + u_time * 0.05, 1.0));
@@ -161,6 +162,8 @@ function hexToRgb(hex) {
     const b = bigint & 255;
     return [r, g, b];
 }
+
+// Event listener to update the font type based on user selection
 
 const fontSelector = document.getElementById('fontSelector');
 fontSelector.addEventListener('change', function() {
